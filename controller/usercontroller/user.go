@@ -1,9 +1,10 @@
 package usercontroller
 
 import (
-	"crypto/sha256"
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -124,7 +125,7 @@ func GenerateApiKey(c *fiber.Ctx) error {
 			Code:   fiber.StatusBadRequest,
 			Status: "Bad Request",
 			Data: fiber.Map{
-				"message": "Failed parsing cookie.",
+				"message": "Failed parsing cookie or cookie doesn't exist.",
 			},
 		})
 	}
@@ -145,8 +146,34 @@ func GenerateApiKey(c *fiber.Ctx) error {
 		})
 	}
 
-	// hash := sha256.Sum256([]byte(user.Username))
-	fmt.Printf("hash: %x", sha256.Sum256([]byte(user.Username)))
+	timeNow := strconv.Itoa(time.Now().Nanosecond())
+	combination := timeNow + strconv.Itoa(int(user.Id))
+	hash := fmt.Sprintf("%x", md5.Sum([]byte(combination)))
 
-	return nil
+	// create new api key in database
+	apiKey := domain.ApiKey{
+		Username: user.Username,
+		ApiKey:   hash,
+		Expires:  time.Now().Add(30 * 24 * time.Hour),
+	}
+
+	errCreate := model.DB.Create(&apiKey).Error
+	if errCreate != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
+			Code:   fiber.StatusBadRequest,
+			Status: "Bad Request",
+			Data: fiber.Map{
+				"message": "Failed creating new API key.",
+			},
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(web.StdResponse{
+		Code:   fiber.StatusCreated,
+		Status: "Created",
+		Data: fiber.Map{
+			"message": "A new API key has been created successfully.",
+			"api_key": hash,
+		},
+	})
 }
