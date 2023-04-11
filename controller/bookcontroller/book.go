@@ -42,6 +42,7 @@ func Create(c *fiber.Ctx) error {
 	})
 }
 
+// FindAll retrieves all of the books in the database (no limit)
 func FindAll(c *fiber.Ctx) error {
 	var books []domain.Book
 	err := model.DB.Find(&books).Error
@@ -62,6 +63,7 @@ func FindAll(c *fiber.Ctx) error {
 	})
 }
 
+// FindById retrieve a book from database
 func FindById(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -85,6 +87,7 @@ func FindById(c *fiber.Ctx) error {
 	})
 }
 
+// Update modify a book entry in database
 func Update(c *fiber.Ctx) error {
 	id := c.Params("id")
 
@@ -123,6 +126,7 @@ func Update(c *fiber.Ctx) error {
 
 }
 
+// Delete delets a book from database
 func Delete(c *fiber.Ctx) error {
 	id := c.Params("id")
 

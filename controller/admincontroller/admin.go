@@ -10,6 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// handler for creating new admin account
 func Create(c *fiber.Ctx) error {
 	var payload domain.Admin
 
@@ -51,6 +52,7 @@ func Create(c *fiber.Ctx) error {
 	})
 }
 
+// admin login
 func Login(c *fiber.Ctx) error {
 
 	var credential domain.Admin

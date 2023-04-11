@@ -11,6 +11,8 @@ import (
 	"github.com/iqbaltaufiq/go-fiber-restapi/model/web"
 )
 
+// check if the user has X-Api-Key set in their header.
+// user must sent an api key to be able to query a book(s).
 var CheckUserApiKey = func(c *fiber.Ctx) error {
 	var keyInDB domain.ApiKey
 	apiKey := c.GetReqHeaders()["X-Api-Key"]
@@ -28,6 +30,8 @@ var CheckUserApiKey = func(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+// check if the user has logged in
+// by checking the "u_auth" cookie
 var CheckUserAuth = func(c *fiber.Ctx) error {
 	var cookie fiber.Map
 	json.Unmarshal([]byte(c.Cookies("u_auth")), &cookie)
@@ -45,6 +49,8 @@ var CheckUserAuth = func(c *fiber.Ctx) error {
 	return c.Next()
 }
 
+// check if the user has logged in as admin
+// to be able to access admin routes
 var CheckAdminAuth = func(c *fiber.Ctx) error {
 	fmt.Printf("Cookie: %s\n\n", c.Cookies("auth"))
 	if c.Cookies("auth") != "admin login" {

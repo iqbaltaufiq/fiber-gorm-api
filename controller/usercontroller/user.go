@@ -56,6 +56,7 @@ func Register(c *fiber.Ctx) error {
 	})
 }
 
+// Handler for login user
 func Login(c *fiber.Ctx) error {
 
 	var credential domain.User
@@ -116,6 +117,9 @@ func Login(c *fiber.Ctx) error {
 	})
 }
 
+// generate an API Key for user
+// to be able to query book(s)
+// the generated key is valid for 30 days
 func GenerateApiKey(c *fiber.Ctx) error {
 	var parseJson fiber.Map
 

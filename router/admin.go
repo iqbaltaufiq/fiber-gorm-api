@@ -7,6 +7,10 @@ import (
 	"github.com/iqbaltaufiq/go-fiber-restapi/middleware"
 )
 
+// route for admin activities
+// admin can retrieve all books,
+// retrieve a single book,
+// modify and delete a book.
 func AdminRouter(app *fiber.App) {
 	router := app.Group("/api/admin")
 	router.Get("/books", middleware.CheckAdminAuth, bookcontroller.FindAll)
