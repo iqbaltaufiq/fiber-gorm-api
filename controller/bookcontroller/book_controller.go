@@ -4,39 +4,38 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/iqbaltaufiq/go-fiber-restapi/helper"
-	"github.com/iqbaltaufiq/go-fiber-restapi/models"
+	"github.com/iqbaltaufiq/go-fiber-restapi/model"
+	"github.com/iqbaltaufiq/go-fiber-restapi/model/domain"
+	"github.com/iqbaltaufiq/go-fiber-restapi/model/web"
 )
-
-type RespMessage map[string]string
 
 // Create creates new book entry into the database
 func Create(c *fiber.Ctx) error {
-	var requestBody models.Book
+	var requestBody domain.Book
 
 	err := c.BodyParser(&requestBody)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(helper.StdResponse{
+		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
 			Code:   fiber.StatusBadRequest,
 			Status: "Bad Request",
-			Data: RespMessage{
+			Data: fiber.Map{
 				"message": "Failed to parse request body.",
 			},
 		})
 	}
 
-	err = models.DB.Create(&requestBody).Error
+	err = model.DB.Create(&requestBody).Error
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(helper.StdResponse{
+		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
 			Code:   fiber.StatusBadRequest,
 			Status: "Bad Request",
-			Data: RespMessage{
+			Data: fiber.Map{
 				"message": "Failed to insert an entry into database.",
 			},
 		})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(helper.StdResponse{
+	return c.Status(fiber.StatusCreated).JSON(web.StdResponse{
 		Code:   fiber.StatusCreated,
 		Status: "Created",
 		Data:   requestBody,
@@ -44,20 +43,19 @@ func Create(c *fiber.Ctx) error {
 }
 
 func FindAll(c *fiber.Ctx) error {
-	var books []models.Book
-
-	err := models.DB.Find(&books).Error
+	var books []domain.Book
+	err := model.DB.Find(&books).Error
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(helper.StdResponse{
+		return c.Status(fiber.StatusNotFound).JSON(web.StdResponse{
 			Code:   fiber.StatusNotFound,
 			Status: "Not Found",
-			Data: RespMessage{
+			Data: fiber.Map{
 				"message": "Entry not found.",
 			},
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(helper.StdResponse{
+	return c.Status(fiber.StatusOK).JSON(web.StdResponse{
 		Code:   fiber.StatusOK,
 		Status: "OK",
 		Data:   books,
@@ -67,20 +65,20 @@ func FindAll(c *fiber.Ctx) error {
 func FindById(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	var book models.Book
+	var book domain.Book
 
-	err := models.DB.First(&book, id).Error
+	err := model.DB.First(&book, id).Error
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(helper.StdResponse{
+		return c.Status(fiber.StatusNotFound).JSON(web.StdResponse{
 			Code:   fiber.StatusNotFound,
 			Status: "Not Found",
-			Data: RespMessage{
+			Data: fiber.Map{
 				"message": "Entry not found.",
 			},
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(helper.StdResponse{
+	return c.Status(fiber.StatusOK).JSON(web.StdResponse{
 		Code:   fiber.StatusOK,
 		Status: "OK",
 		Data:   book,
@@ -90,25 +88,25 @@ func FindById(c *fiber.Ctx) error {
 func Update(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	var book models.Book
+	var book domain.Book
 
 	err := c.BodyParser(&book)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(helper.StdResponse{
+		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
 			Code:   fiber.StatusBadRequest,
 			Status: "Bad Request",
-			Data: RespMessage{
+			Data: fiber.Map{
 				"message": "Failed to parse request body.",
 			},
 		})
 	}
 
-	err = models.DB.Where("id = ?", id).Updates(&book).Error
+	err = model.DB.Where("id = ?", id).Updates(&book).Error
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(helper.StdResponse{
+		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
 			Code:   fiber.StatusBadRequest,
 			Status: "Bad Request",
-			Data: RespMessage{
+			Data: fiber.Map{
 				"message": "Failed to update an entry.",
 			},
 		})
@@ -117,7 +115,7 @@ func Update(c *fiber.Ctx) error {
 	idInt, _ := strconv.Atoi(id)
 	book.Id = int64(idInt)
 
-	return c.Status(fiber.StatusOK).JSON(helper.StdResponse{
+	return c.Status(fiber.StatusOK).JSON(web.StdResponse{
 		Code:   fiber.StatusOK,
 		Status: "OK",
 		Data:   book,
@@ -128,23 +126,23 @@ func Update(c *fiber.Ctx) error {
 func Delete(c *fiber.Ctx) error {
 	id := c.Params("id")
 
-	var book models.Book
+	var book domain.Book
 
-	err := models.DB.Delete(&book, id).Error
+	err := model.DB.Delete(&book, id).Error
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(helper.StdResponse{
+		return c.Status(fiber.StatusNotFound).JSON(web.StdResponse{
 			Code:   fiber.StatusNotFound,
 			Status: "Bad Request",
-			Data: RespMessage{
+			Data: fiber.Map{
 				"message": err.Error(),
 			},
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(helper.StdResponse{
+	return c.Status(fiber.StatusOK).JSON(web.StdResponse{
 		Code:   fiber.StatusOK,
 		Status: "OK",
-		Data: RespMessage{
+		Data: fiber.Map{
 			"message": "An entry has been deleted.",
 		},
 	})

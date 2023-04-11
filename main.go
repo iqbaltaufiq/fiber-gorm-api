@@ -1,31 +1,29 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/iqbaltaufiq/go-fiber-restapi/controllers/bookcontroller"
-	"github.com/iqbaltaufiq/go-fiber-restapi/models"
+	"github.com/iqbaltaufiq/go-fiber-restapi/middleware"
+	"github.com/iqbaltaufiq/go-fiber-restapi/model"
+	"github.com/iqbaltaufiq/go-fiber-restapi/router"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// create a db connection
-	// and run migration
-	models.NewDBConnection()
+	godotenv.Load()
+
+	model.SetupDatabase()
+	model.RunMigration()
 
 	app := fiber.New()
 
-	// implement CORS
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://127.0.0.1:5500",
-		AllowHeaders: "Origin, Content-Type, Accept",
-	}))
+	middleware.SetupMiddleware(app)
 
-	api := app.Group("/api")
-	api.Get("/books", bookcontroller.FindAll)
-	api.Get("/books/:id", bookcontroller.FindById)
-	api.Post("/books", bookcontroller.Create)
-	api.Put("/books/:id", bookcontroller.Update)
-	api.Delete("/books/:id", bookcontroller.Delete)
+	// router here
+	router.BookRouter(app)
+	router.AdminRouter(app)
 
-	app.Listen(":3000")
+	app.Listen(fmt.Sprintf("%s:%s", os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT")))
 }
