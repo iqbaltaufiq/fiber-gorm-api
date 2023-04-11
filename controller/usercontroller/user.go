@@ -1,6 +1,9 @@
-package admincontroller
+package usercontroller
 
 import (
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,23 +13,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Create(c *fiber.Ctx) error {
-	var payload domain.Admin
-
+// Handler for registering new user
+func Register(c *fiber.Ctx) error {
+	var payload domain.User
 	errParse := c.BodyParser(&payload)
 	if errParse != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
 			Code:   fiber.StatusBadRequest,
-			Status: "BAD REQUEST",
+			Status: "Bad Request",
 			Data: fiber.Map{
 				"message": "Failed parsing request body.",
 			},
 		})
 	}
 
-	payload.Role = "admin"
+	// set role for user
+	payload.Role = "user"
 
-	// hash the password before inserted into DB
+	// hash user password
+	// before being inserted into db
 	hash, _ := bcrypt.GenerateFromPassword([]byte(payload.Password), bcrypt.DefaultCost)
 	payload.Password = string(hash)
 
@@ -34,9 +39,9 @@ func Create(c *fiber.Ctx) error {
 	if errCreate != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
 			Code:   fiber.StatusBadRequest,
-			Status: "BAD REQUEST",
+			Status: "Bad Request",
 			Data: fiber.Map{
-				"message": "Failed creating new admin.",
+				"message": "Failed creating new user.",
 			},
 		})
 	}
@@ -45,15 +50,14 @@ func Create(c *fiber.Ctx) error {
 		Code:   fiber.StatusCreated,
 		Status: "Created",
 		Data: fiber.Map{
-			"message": "A new admin has been created successfully.",
-			"admin":   payload,
+			"message": "A new user has been created successfully.",
 		},
 	})
 }
 
 func Login(c *fiber.Ctx) error {
 
-	var credential domain.Admin
+	var credential domain.User
 	errParse := c.BodyParser(&credential)
 	if errParse != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
@@ -65,9 +69,9 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	var adminInDB domain.Admin
+	var userInDB domain.User
 
-	errFind := model.DB.Where("username = ?", credential.Username).First(&adminInDB).Error
+	errFind := model.DB.Where("username = ?", credential.Username).First(&userInDB).Error
 	if errFind != nil {
 		return c.Status(fiber.StatusNotFound).JSON(web.StdResponse{
 			Code:   fiber.StatusNotFound,
@@ -80,7 +84,7 @@ func Login(c *fiber.Ctx) error {
 
 	// check if the password sent by user
 	// match the password in the db
-	errHash := bcrypt.CompareHashAndPassword([]byte(adminInDB.Password), []byte(credential.Password))
+	errHash := bcrypt.CompareHashAndPassword([]byte(userInDB.Password), []byte(credential.Password))
 	if errHash != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
 			Code:   fiber.StatusBadRequest,
@@ -91,10 +95,12 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+	cookieValue := fmt.Sprintf(`{"id":"%d","r":"user"}`, userInDB.Id)
+
 	// set cookie
 	c.Cookie(&fiber.Cookie{
-		Name:    "auth",
-		Value:   "admin login",
+		Name:    "u_auth",
+		Value:   cookieValue,
 		Path:    "/",
 		Domain:  "localhost",
 		Expires: time.Now().Add(30 * 24 * time.Hour),
@@ -107,4 +113,40 @@ func Login(c *fiber.Ctx) error {
 			"message": "Login success",
 		},
 	})
+}
+
+func GenerateApiKey(c *fiber.Ctx) error {
+	var parseJson fiber.Map
+
+	errParse := json.Unmarshal([]byte(c.Cookies("u_auth")), &parseJson)
+	if errParse != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(web.StdResponse{
+			Code:   fiber.StatusBadRequest,
+			Status: "Bad Request",
+			Data: fiber.Map{
+				"message": "Failed parsing cookie.",
+			},
+		})
+	}
+
+	id := parseJson["id"]
+
+	var user domain.User
+
+	// fetch the user from db
+	errFetch := model.DB.Where("id = ?", id).First(&user).Error
+	if errFetch != nil {
+		return c.Status(fiber.StatusNotFound).JSON(web.StdResponse{
+			Code:   fiber.StatusNotFound,
+			Status: "Not Found",
+			Data: fiber.Map{
+				"message": "User not found.",
+			},
+		})
+	}
+
+	// hash := sha256.Sum256([]byte(user.Username))
+	fmt.Printf("hash: %x", sha256.Sum256([]byte(user.Username)))
+
+	return nil
 }

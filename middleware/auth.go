@@ -8,7 +8,7 @@ import (
 	"github.com/iqbaltaufiq/go-fiber-restapi/model/web"
 )
 
-var CheckUserAuth = func(c *fiber.Ctx) error {
+var CheckUserApiKey = func(c *fiber.Ctx) error {
 	if c.GetReqHeaders()["X-Api-Key"] != "SECRET" {
 		return errors.New("Unauthorized")
 	}

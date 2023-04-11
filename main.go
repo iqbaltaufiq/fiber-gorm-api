@@ -24,6 +24,7 @@ func main() {
 	// router here
 	router.BookRouter(app)
 	router.AdminRouter(app)
+	router.UserRouter(app)
 
 	app.Listen(fmt.Sprintf("%s:%s", os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT")))
 }

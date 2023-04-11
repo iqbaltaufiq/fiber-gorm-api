@@ -8,7 +8,7 @@ import (
 
 func BookRouter(app *fiber.App) {
 	router := app.Group("/api")
-	router.Get("/books", middleware.CheckUserAuth, bookcontroller.FindAll)
+	router.Get("/books", middleware.CheckUserApiKey, bookcontroller.FindAll)
 	router.Get("/books/:id", bookcontroller.FindById)
 	router.Post("/books", bookcontroller.Create)
 	router.Put("/books/:id", bookcontroller.Update)
