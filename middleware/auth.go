@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -52,7 +51,6 @@ var CheckUserAuth = func(c *fiber.Ctx) error {
 // check if the user has logged in as admin
 // to be able to access admin routes
 var CheckAdminAuth = func(c *fiber.Ctx) error {
-	fmt.Printf("Cookie: %s\n\n", c.Cookies("auth"))
 	if c.Cookies("auth") != "admin login" {
 		return c.Status(fiber.StatusUnauthorized).JSON(web.StdResponse{
 			Code:   fiber.StatusUnauthorized,
