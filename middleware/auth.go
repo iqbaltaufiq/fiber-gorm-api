@@ -51,7 +51,7 @@ var CheckUserAuth = func(c *fiber.Ctx) error {
 // check if the user has logged in as admin
 // to be able to access admin routes
 var CheckAdminAuth = func(c *fiber.Ctx) error {
-	if c.Cookies("auth") != "admin login" {
+	if c.Cookies("a_auth") != "admin login" {
 		return c.Status(fiber.StatusUnauthorized).JSON(web.StdResponse{
 			Code:   fiber.StatusUnauthorized,
 			Status: "Unauthorized",

@@ -10,7 +10,7 @@ import (
 // user with role 'user' can only
 // retrieve book(s).
 func BookRouter(app *fiber.App, bookcontroller bookcontroller.BookController) {
-	router := app.Group("/api", middleware.CheckUserApiKey)
-	router.Get("/books", bookcontroller.FindAll)
-	router.Get("/books/:id", bookcontroller.FindById)
+	router := app.Group("/api")
+	router.Get("/books", middleware.CheckUserApiKey, bookcontroller.FindAll)
+	router.Get("/books/:id", middleware.CheckUserApiKey, bookcontroller.FindById)
 }
