@@ -10,13 +10,15 @@ var DB *gorm.DB
 
 // create a database connection
 // then export it into global var
-func SetupDatabase() {
+func SetupDatabase() *gorm.DB {
 	db, err := gorm.Open(mysql.Open("root:@tcp(localhost:3306)/go_fiber_restapi?parseTime=true"))
 	if err != nil {
 		panic(err)
 	}
 
 	DB = db
+
+	return db
 }
 
 // run migration for model 'book'
