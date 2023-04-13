@@ -11,7 +11,7 @@ import (
 // admin can retrieve all books,
 // retrieve a single book,
 // modify and delete a book.
-func AdminRouter(app *fiber.App, admincontroller admincontroller.AdminController, bookcontroller bookcontroller.BookController) {
+func AdminRouter(app *fiber.App, middleware *middleware.AuthMiddleware, admincontroller admincontroller.AdminController, bookcontroller bookcontroller.BookController) {
 	router := app.Group("/api/admin")
 	router.Get("/books", middleware.CheckAdminAuth, bookcontroller.FindAll)
 	router.Get("/books/:id", middleware.CheckAdminAuth, bookcontroller.FindById)

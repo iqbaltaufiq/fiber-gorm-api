@@ -6,26 +6,22 @@ import (
 	"gorm.io/gorm"
 )
 
-var DB *gorm.DB
-
 // create a database connection
 // then export it into global var
-func SetupDatabase() *gorm.DB {
-	db, err := gorm.Open(mysql.Open("root:@tcp(localhost:3306)/go_fiber_restapi?parseTime=true"))
+func OpenConnection() *gorm.DB {
+	db, err := gorm.Open(mysql.Open("root:@tcp(localhost:3306)/go_fiber_restapi?parseTime=true"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
-
-	DB = db
 
 	return db
 }
 
 // run migration for model 'book'
-func RunMigration() {
+func RunMigration(db *gorm.DB) {
 	// run database migration
-	DB.AutoMigrate(&domain.Book{})
-	DB.AutoMigrate(&domain.Admin{})
-	DB.AutoMigrate(&domain.User{})
-	DB.AutoMigrate(&domain.ApiKey{})
+	db.AutoMigrate(&domain.Book{})
+	db.AutoMigrate(&domain.Admin{})
+	db.AutoMigrate(&domain.User{})
+	db.AutoMigrate(&domain.ApiKey{})
 }

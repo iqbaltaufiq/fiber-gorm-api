@@ -15,14 +15,15 @@ import (
 func main() {
 	godotenv.Load()
 
-	db := model.SetupDatabase()
+	db := model.OpenConnection()
 	validate := validator.New()
-	model.RunMigration()
+	model.RunMigration(db)
 
 	app := fiber.New()
 
 	middleware.SetupMiddleware(app)
-	router.NewRouter(app, db, validate)
+	middleware := middleware.NewAuthMiddleware(db)
+	router.NewRouter(app, middleware, db, validate)
 
 	app.Listen(fmt.Sprintf("%s:%s", os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT")))
 }

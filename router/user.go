@@ -8,7 +8,7 @@ import (
 // router for handling user's credential stuffs
 // like creating new user
 // logging in and generating new API key.
-func UserRouter(c *fiber.App) {
+func UserRouter(c *fiber.App, usercontroller usercontroller.UserController) {
 	router := c.Group("/api/user")
 	router.Post("/register", usercontroller.Register)
 	router.Post("/login", usercontroller.Login)

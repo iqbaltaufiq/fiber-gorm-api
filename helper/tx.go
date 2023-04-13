@@ -1,6 +1,8 @@
 package helper
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 func CommitOrRollback(tx *gorm.DB) {
 	errRecover := recover()
@@ -13,6 +15,5 @@ func CommitOrRollback(tx *gorm.DB) {
 		if errCommit := tx.Commit().Error; errCommit != nil {
 			panic(errCommit)
 		}
-
 	}
 }
